@@ -1,16 +1,33 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import DashboardScreen from '../screens/DashboardScreen';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons'; // Certifique-se de ter o @expo/vector-icons instalado
+
+import HomeScreen from '../screens/HomeScreen';
+import TasksScreen from '../screens/TasksScreen';
 import { colors, typography } from '../styles/global';
 
-const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
 const AppNavigator = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+
+            if (route.name === 'Home') {
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === 'Tarefas') {
+              iconName = focused ? 'list' : 'list-outline';
+            }
+
+            // Você pode retornar qualquer componente aqui!
+            return <Ionicons name={iconName as any} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: 'gray',
           headerStyle: {
             backgroundColor: colors.primary,
           },
@@ -18,14 +35,19 @@ const AppNavigator = () => {
           headerTitleStyle: {
             ...typography.h2,
           },
-        }}
+        })}
       >
-        <Stack.Screen 
-          name="Dashboard" 
-          component={DashboardScreen} 
-          options={{ title: 'Dashboard de Produtividade' }}
+        <Tab.Screen 
+          name="Home" 
+          component={HomeScreen} 
+          options={{ title: 'Painel de Produtividade' }}
         />
-      </Stack.Navigator>
+        <Tab.Screen 
+          name="Tarefas" 
+          component={TasksScreen} 
+          options={{ title: 'Gerenciador de Tarefas' }}
+        />
+      </Tab.Navigator>
     </NavigationContainer>
   );
 };
