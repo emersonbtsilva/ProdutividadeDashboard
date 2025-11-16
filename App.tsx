@@ -1,6 +1,8 @@
 import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
+import { NativeBaseProvider } from 'native-base';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
@@ -51,5 +53,11 @@ export default function App() {
     }
   }, []);
 
-  return <AppNavigator />;
+  return (
+    <NativeBaseProvider>
+      <SafeAreaProvider>
+        <AppNavigator />
+      </SafeAreaProvider>
+    </NativeBaseProvider>
+  );
 }
