@@ -8,11 +8,14 @@ import HomeScreen from '../screens/HomeScreen';
 import TasksScreen from '../screens/TasksScreen';
 import LoginScreen from '../screens/LoginScreen';
 import { colors, typography } from '../styles/global';
+import { useAuth } from '../context/AuthContext';
+import { Pressable, Text } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 const MainTabs = () => {
+  const { signOut } = useAuth();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -34,6 +37,11 @@ const MainTabs = () => {
         headerTitleStyle: {
           ...typography.h2,
         },
+        headerRight: () => (
+          <Pressable onPress={signOut} style={{ paddingHorizontal: 12 }}>
+            <Ionicons name="log-out-outline" size={22} color={colors.surface} />
+          </Pressable>
+        ),
       })}
     >
       <Tab.Screen 
@@ -51,11 +59,15 @@ const MainTabs = () => {
 }
 
 const AppNavigator = () => {
+  const { isLoggedIn } = useAuth();
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Main" component={MainTabs} />
+        {!isLoggedIn ? (
+          <Stack.Screen name="Login" component={LoginScreen} />
+        ) : (
+          <Stack.Screen name="Main" component={MainTabs} />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

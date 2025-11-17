@@ -5,6 +5,7 @@ import { NativeBaseProvider } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
+import { AuthProvider } from './src/context/AuthContext';
 import { theme } from './src/styles/theme';
 
 export default function App() {
@@ -84,7 +85,9 @@ export default function App() {
       }}
     >
       <SafeAreaProvider>
-        <AppNavigator />
+        <AuthProvider>
+          <AppNavigator />
+        </AuthProvider>
       </SafeAreaProvider>
     </NativeBaseProvider>
   );
