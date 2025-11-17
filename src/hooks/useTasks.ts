@@ -25,11 +25,14 @@ export interface UseTasksReturn {
     priority?: TaskPriority;
     category?: TaskCategory;
     dueDate?: Date;
+    startedAt?: Date;
+    completedAt?: Date;
   }) => Promise<TaskOperationResult>;
   
   updateTask: (id: string, updates: Partial<Task>) => Promise<TaskOperationResult>;
   updateTaskStatus: (id: string, status: TaskStatus) => Promise<TaskOperationResult>;
   deleteTask: (id: string) => Promise<TaskOperationResult>;
+  purgeDeleted: () => Promise<TaskOperationResult>;
   
   // Filtros
   setFilters: (filters: TaskFilters) => void;
@@ -51,7 +54,9 @@ export const useTasks = (): UseTasksReturn => {
   // Calcular estatísticas
   const stats = useMemo((): TaskStats => {
     const now = new Date();
-    
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const daysAgo = (n: number) => new Date(now.getFullYear(), now.getMonth(), now.getDate() - n);
+
     const byStatus = tasks.reduce((acc, task) => {
       acc[task.status] = (acc[task.status] || 0) + 1;
       return acc;
@@ -78,6 +83,50 @@ export const useTasks = (): UseTasksReturn => {
       task.dueDate < now
     ).length;
 
+    // Tarefas concluídas com completedAt válido
+    const completedTasks = tasks.filter(t => t.status === 'concluída' && t.completedAt);
+
+    // Métricas de período
+    const completedToday = completedTasks.filter(t => (t.completedAt as Date) >= startOfToday).length;
+    const completedLast7Days = completedTasks.filter(t => (t.completedAt as Date) >= daysAgo(6)).length; // inclui hoje
+    const completedLast30Days = completedTasks.filter(t => (t.completedAt as Date) >= daysAgo(29)).length;
+
+    // Média de tempo para concluir (em horas)
+    const completionDurationsHours: number[] = completedTasks
+      .filter(t => t.createdAt)
+      .map(t => {
+        const finished = (t.completedAt as Date).getTime();
+        const created = new Date(t.createdAt).getTime();
+        return Math.max(0, (finished - created) / 36e5); // ms -> horas
+      });
+    const averageCompletionTimeHours = completionDurationsHours.length
+      ? completionDurationsHours.reduce((a, b) => a + b, 0) / completionDurationsHours.length
+      : null;
+
+    // Concluídas no prazo vs. atrasadas (apenas quando há dueDate)
+    let onTimeCompleted = 0;
+    let lateCompleted = 0;
+    completedTasks.forEach(t => {
+      if (t.dueDate) {
+        if ((t.completedAt as Date) <= t.dueDate) onTimeCompleted++;
+        else lateCompleted++;
+      }
+    });
+
+    // Série diária dos últimos 30 dias
+    const byDayCompletedLast30: Array<{ date: string; count: number }> = [];
+    for (let i = 29; i >= 0; i--) {
+      const day = daysAgo(i);
+      const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+      const dayEnd = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 23, 59, 59, 999);
+      const count = completedTasks.filter(t => {
+        const c = t.completedAt as Date;
+        return c >= dayStart && c <= dayEnd;
+      }).length;
+      const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+      byDayCompletedLast30.push({ date: dateStr, count });
+    }
+
     return {
       total: tasks.length,
       completed: byStatus['concluída'] || 0,
@@ -86,6 +135,13 @@ export const useTasks = (): UseTasksReturn => {
       overdue,
       byPriority,
       byCategory,
+      completedToday,
+      completedLast7Days,
+      completedLast30Days,
+      averageCompletionTimeHours,
+      onTimeCompleted,
+      lateCompleted,
+      byDayCompletedLast30,
     };
   }, [tasks]);
 
@@ -180,6 +236,8 @@ export const useTasks = (): UseTasksReturn => {
     priority?: TaskPriority;
     category?: TaskCategory;
     dueDate?: Date;
+    startedAt?: Date;
+    completedAt?: Date;
   }): Promise<TaskOperationResult> => {
     // Validação
     const titleValidation = validateTaskTitle(params.title);
@@ -198,12 +256,14 @@ export const useTasks = (): UseTasksReturn => {
         id: `task_${now.getTime()}_${Math.random().toString(36).substr(2, 9)}`,
         title: sanitizeText(params.title),
         description: params.description ? sanitizeText(params.description) : undefined,
-        status: 'em andamento',
+        status: params.completedAt ? 'concluída' : 'em andamento',
         priority: params.priority || 'média',
         category: params.category || 'outros',
         createdAt: now,
         updatedAt: now,
         dueDate: params.dueDate,
+        startedAt: params.startedAt,
+        completedAt: params.completedAt,
       };
 
       const previousTasks = [...tasks];
@@ -259,7 +319,7 @@ export const useTasks = (): UseTasksReturn => {
         ...tasks[taskIndex],
         ...updates,
         updatedAt: new Date(),
-        ...(updates.status === 'concluída' && !tasks[taskIndex].completedAt ? 
+        ...(updates.status === 'concluída' && !tasks[taskIndex].completedAt && !updates.completedAt ? 
           { completedAt: new Date() } : {})
       };
 
@@ -296,6 +356,23 @@ export const useTasks = (): UseTasksReturn => {
     return updateTask(id, { status: 'excluída' });
   }, [updateTask]);
 
+  // Remover permanentemente tarefas com status 'excluída'
+  const purgeDeleted = useCallback(async (): Promise<TaskOperationResult> => {
+    try {
+      const previousTasks = [...tasks];
+      const updatedTasks = tasks.filter(t => t.status !== 'excluída');
+      setTasks(updatedTasks);
+      const result = await saveTasksOptimistically(updatedTasks, previousTasks);
+      if (!result.success) {
+        return { success: false, error: result.error };
+      }
+      return { success: true };
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Erro ao esvaziar lixeira';
+      return { success: false, error: errorMsg };
+    }
+  }, [tasks, saveTasksOptimistically]);
+
   // Atualizar filtros
   const setTaskFilters = useCallback((newFilters: TaskFilters) => {
     setFilters(newFilters);
@@ -331,6 +408,7 @@ export const useTasks = (): UseTasksReturn => {
     updateTask,
     updateTaskStatus,
     deleteTask,
+  purgeDeleted,
     setFilters: setTaskFilters,
     clearFilters,
     refreshTasks,

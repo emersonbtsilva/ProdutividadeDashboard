@@ -29,6 +29,7 @@ const migrateTaskData = (rawTask: any): Task => {
     createdAt: rawTask.createdAt ? new Date(rawTask.createdAt) : now,
     updatedAt: rawTask.updatedAt ? new Date(rawTask.updatedAt) : now,
     completedAt: rawTask.completedAt ? new Date(rawTask.completedAt) : undefined,
+    startedAt: rawTask.startedAt ? new Date(rawTask.startedAt) : undefined,
     dueDate: rawTask.dueDate ? new Date(rawTask.dueDate) : undefined,
   };
 };

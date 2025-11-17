@@ -124,6 +124,13 @@ const TaskList: React.FC<TaskListProps> = ({
             <Text style={styles.dateValue}>{formatDate(new Date(task.createdAt))}</Text>
           </View>
 
+            {task.startedAt && (
+              <View style={styles.dateInfo}>
+                <Text style={styles.dateLabel}>Início:</Text>
+                <Text style={styles.dateValue}>{formatDate(new Date(task.startedAt))}</Text>
+              </View>
+            )}
+
           {task.dueDate && (
             <View style={styles.dateInfo}>
               <Text style={[styles.dateLabel, isOverdue && styles.overdueText]}>
@@ -249,6 +256,13 @@ const TaskList: React.FC<TaskListProps> = ({
                 <Text style={styles.dateLabel}>Criada:</Text>
                 <Text style={styles.dateValue}>{formatDate(new Date(task.createdAt))}</Text>
               </View>
+
+              {task.startedAt && (
+                <View style={styles.dateInfo}>
+                  <Text style={styles.dateLabel}>Início:</Text>
+                  <Text style={styles.dateValue}>{formatDate(new Date(task.startedAt))}</Text>
+                </View>
+              )}
 
               {task.dueDate && (
                 <View style={styles.dateInfo}>

@@ -153,4 +153,16 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+
+  dateButton: {
+    borderColor: colors.border,
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: colors.background,
+  },
+  dateButtonText: {
+    color: colors.text,
+    fontSize: 14,
+  },
 });

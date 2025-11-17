@@ -40,7 +40,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 8,
   },
   
   // Stat cards
@@ -54,7 +53,9 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    width: (width - 48) / 2, // 2 columns with margins
+    // Use percent width to ensure responsive 2-column grid on web/mobile
+    width: '48%',
+    marginBottom: 12,
   },
   
   statCardHeader: {
@@ -101,6 +102,44 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
+
+  // Range toggle & trend
+  rangeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  rangeToggle: {
+    flexDirection: 'row',
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    padding: 4,
+  },
+  rangeBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 6,
+  },
+  rangeBtnActive: {
+    backgroundColor: colors.primary,
+  },
+  rangeBtnText: {
+    ...typography.body,
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: '600',
+  },
+  rangeBtnTextActive: {
+    color: colors.surface,
+  },
+  trendChartContainer: {
+    alignItems: 'stretch',
+  },
+  trendChart: {
+    height: 120,
+    width: '100%',
+  },
   
   sectionTitle: {
     ...typography.body,
@@ -141,6 +180,43 @@ export const styles = StyleSheet.create({
     ...typography.body,
     fontSize: 12,
     color: colors.textSecondary,
+  },
+
+  // Deadlines
+  deadlineItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.border,
+  },
+  deadlineTitle: {
+    ...typography.body,
+    color: colors.text,
+  },
+  deadlineDate: {
+    ...typography.body,
+    color: colors.textSecondary,
+    fontSize: 12,
+  },
+
+  // Bars
+  barChart: {
+    height: 140,
+    width: '100%',
+  },
+  barLabelsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  barLabel: {
+    ...typography.body,
+    fontSize: 11,
+    color: colors.textSecondary,
+    width: '24%'
   },
   
   // Legend

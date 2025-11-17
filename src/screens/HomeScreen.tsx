@@ -5,7 +5,7 @@ import { useTasks } from '../hooks/useTasks';
 import { styles } from './HomeScreen.styles';
 
 const HomeScreen = () => {
-  const { stats, isLoading, refreshTasks } = useTasks();
+  const { stats, isLoading, refreshTasks, tasks } = useTasks();
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const handleRefresh = React.useCallback(async () => {
@@ -31,7 +31,7 @@ const HomeScreen = () => {
           />
         }
       >
-        <ProductivityChart stats={stats} isLoading={isLoading} />
+        <ProductivityChart stats={stats} isLoading={isLoading} tasks={tasks} />
       </ScrollView>
     </SafeAreaView>
   );

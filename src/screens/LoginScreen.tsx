@@ -14,10 +14,10 @@ const LoginScreen = () => {
   return (
     <Center flex={1} px="3">
       <Box safeArea p="2" py="8" w="90%" maxW="290">
-        <Heading size="lg" fontWeight="600" color="coolGray.800">
+        <Heading size="lg" fontWeight="600">
           Bem-vindo
         </Heading>
-        <Heading mt="1" color="coolGray.600" fontWeight="medium" size="xs">
+        <Heading mt="1" fontWeight="medium" size="xs">
           Faça login para continuar!
         </Heading>
 
@@ -29,18 +29,18 @@ const LoginScreen = () => {
           <FormControl>
             <FormControl.Label>Senha</FormControl.Label>
             <Input type="password" />
-            <Link _text={{ fontSize: 'xs', fontWeight: '500', color: 'indigo.500' }} alignSelf="flex-end" mt="1">
+            <Link _text={{ fontSize: 'xs', fontWeight: '500', color: 'primary.500' }} alignSelf="flex-end" mt="1">
               Esqueceu a senha?
             </Link>
           </FormControl>
-          <Button mt="2" colorScheme="indigo" onPress={handleLogin}>
+          <Button mt="2" colorScheme="primary" onPress={handleLogin}>
             Entrar
           </Button>
           <VStack mt="6" justifyContent="center">
-            <Text fontSize="sm" color="coolGray.600">
+            <Text fontSize="sm" color="muted.600">
               Não tem uma conta?{' '}
             </Text>
-            <Link _text={{ color: 'indigo.500', fontWeight: 'medium', fontSize: 'sm' }}>
+            <Link _text={{ color: 'primary.500', fontWeight: 'medium', fontSize: 'sm' }}>
               Cadastre-se
             </Link>
           </VStack>

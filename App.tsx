@@ -2,8 +2,10 @@ import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { NativeBaseProvider } from 'native-base';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
+import { theme } from './src/styles/theme';
 
 export default function App() {
   useEffect(() => {
@@ -54,7 +56,33 @@ export default function App() {
   }, []);
 
   return (
-    <NativeBaseProvider>
+    <NativeBaseProvider
+      theme={theme}
+      colorModeManager={{
+        get: async () => {
+          try {
+            if (Platform.OS === 'web') {
+              const val = window.localStorage.getItem('@color-mode');
+              return val === 'dark' ? 'dark' : 'light';
+            } else {
+              const val = await AsyncStorage.getItem('@color-mode');
+              return val === 'dark' ? 'dark' : 'light';
+            }
+          } catch {
+            return 'light';
+          }
+        },
+        set: async (value: 'light' | 'dark') => {
+          try {
+            if (Platform.OS === 'web') {
+              window.localStorage.setItem('@color-mode', value);
+            } else {
+              await AsyncStorage.setItem('@color-mode', value);
+            }
+          } catch {}
+        },
+      }}
+    >
       <SafeAreaProvider>
         <AppNavigator />
       </SafeAreaProvider>
